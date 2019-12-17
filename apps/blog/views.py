@@ -26,7 +26,7 @@ class PostView(GenericAPIView):
 
     def get(self, request, post_id):
         try:
-            data = PostSerializer(translateQuerySet(self.get_queryset().get(pk=post_id),request)).data
+            data = PostSerializer(translateQuerySet(self.get_queryset(),request).get(pk=post_id)).data
             return Response(data)
         except Post.DoesNotExist:
             raise Http404
@@ -42,14 +42,7 @@ class CommentListView(GenericAPIView):
 
     def get(self, request, post_id):
         try:
-            all_comments = translateQuerySet(self.get_queryset().filter(post__id=post_id),request)
-            user_comments = all_comments.filter(
-                writer_name=request.user.username)
-            user_comments.order_by('-date')
-            other_users_comments = all_comments.exclude(
-                writer_name=request.user.username)
-            other_users_comments.order_by('-date')
-            comments = list(user_comments) + list(other_users_comments)
+            comments = translateQuerySet(self.get_queryset().filter(post__id=post_id),request).order_by('-date')
             data = CommentSerializer(comments, many=True).data
             return Response(data)
         except Exception:
