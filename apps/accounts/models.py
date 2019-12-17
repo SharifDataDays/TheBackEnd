@@ -3,7 +3,7 @@ from django.db import models
 from apps.translation.models import translatedTextField
 
 
-class Profile(models.Model):
+class UserProfile(models.Model):
     user = models.OneToOneField(User,
                                 on_delete=models.CASCADE,
                                 related_name='profile')

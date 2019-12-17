@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from apps.translation.serializer import TranslatedTextSerializer
 from apps.translation.models import TranslatedText
-from apps.accounts.models import Profile
+from apps.accounts.models import UserProfile
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -10,16 +10,16 @@ class ProfileSerializer(serializers.ModelSerializer):
     last_name = TranslatedTextSerializer()
 
     class Meta:
-        model = Profile
-        fields = ['first_name', 'last_name', 'email', 'birth_date', 'residence', 'education']
+        model = UserProfile
+        fields = ['user', 'first_name', 'last_name', 'email', 'birth_date', 'residence', 'education']
 
     def create(self, validated_data):
         first_name_data = validated_data.pop('first_name')
         last_name_data = validated_data.pop('last_name')
-        profile = Profile.objects.create(**validated_data)
-        TranslatedText.objects.create(profile=profile, **first_name_data)
-        TranslatedText.objects.create(profile=profile, **last_name_data)
-
+        validated_data['first_name'] = TranslatedText.objects.create( **first_name_data)
+        validated_data['last_name'] = TranslatedText.objects.create( **last_name_data)
+        return UserProfile.objects.create(**validated_data)
+        
 
 class UserSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
@@ -31,14 +31,8 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
         user = User.objects.create(**validated_data)
-        Profile.objects.get_or_create(user=user, **profile_data)
+        profile_data['user'] = user.pk
+        ser = ProfileSerializer(data=profile_data)
+        if ser.is_valid():
+            ser.save()
         return user
-
-
-class ProfileTranslateSerializer(serializers.ModelSerializer):
-    first_name_value = TranslatedTextSerializer()
-    last_name_value = serializers.CharField()
-
-    class Meta:
-        model = Profile
-        exclude = ['user', 'first_name', 'last_name']

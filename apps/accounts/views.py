@@ -11,7 +11,7 @@ from apps.translation.util import translateQuerySet
 
 
 class SignUpView(GenericAPIView):
-    queryset = Profile.objects.all()
+    queryset = UserProfile.objects.all()
     serializer_class = UserSerializer
 
     def post(self, request):
@@ -27,7 +27,7 @@ class SignUpView(GenericAPIView):
 
 
 class LogoutView(GenericAPIView):
-    queryset = Profile.objects.all()
+    queryset = UserProfile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -37,7 +37,7 @@ class LogoutView(GenericAPIView):
 
 
 class ForgotPasswordView(GenericAPIView):
-    queryset = Profile.objects.all()
+    queryset = UserProfile.objects.all()
     serializer_class = ProfileSerializer
 
     def post(self, request):
@@ -45,7 +45,7 @@ class ForgotPasswordView(GenericAPIView):
 
 
 class LoginWithGoogleView(GenericAPIView):
-    queryset = Profile.objects.all()
+    queryset = UserProfile.objects.all()
     serializer_class = ProfileSerializer
 
     def post(self, request):
