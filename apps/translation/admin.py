@@ -10,6 +10,7 @@ class TranslatedTextInlineSmall(ReverseInlineModelAdmin):
     model = TranslatedText
     formfield_overrides = {
         models.TextField: {'widget': widgets.AdminTextInputWidget},
+
     }
 
 

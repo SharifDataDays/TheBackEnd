@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from apps.blog.serializers import *
 from apps.blog import paginations
 
+from apps.translation.util import translateQuerySet
+
 
 # Create your views here.
 
@@ -12,8 +14,9 @@ class BlogView(GenericAPIView):
     serializer_class = PostDescriptionSerializer
     queryset = Post.objects.all().order_by('-date')
 
+
     def get(self, request):
-        descriptions = PostDescriptionSerializer(self.get_queryset(), many=True)
+        descriptions = PostDescriptionSerializer(translateQuerySet(self.get_queryset(),request), many=True)
         return Response(descriptions.data)
 
 
@@ -23,7 +26,7 @@ class PostView(GenericAPIView):
 
     def get(self, request, post_id):
         try:
-            data = PostSerializer(self.get_queryset().get(pk=post_id)).data
+            data = PostSerializer(translateQuerySet(self.get_queryset().get(pk=post_id),request)).data
             return Response(data)
         except Post.DoesNotExist:
             raise Http404
@@ -31,16 +34,16 @@ class PostView(GenericAPIView):
 
 class CommentListView(GenericAPIView):
     serializer_class = CommentSerializer
-    queryset = Comment.objects.all().order_by('-date')
+    # queryset = Comment.objects.all().order_by('-date')
     permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = paginations.CommentsPagination
 
     def get_queryset(self):
-        return Comment.objects.all().exclude(shown=False)
+        return Comment.objects.all().exclude(shown=False).order_by('-date')
 
     def get(self, request, post_id):
         try:
-            all_comments = self.get_queryset().filter(post__id=post_id)
+            all_comments = translateQuerySet(self.get_queryset().filter(post__id=post_id),request)
             user_comments = all_comments.filter(
                 writer_name=request.user.username)
             user_comments.order_by('-date')
