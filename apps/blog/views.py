@@ -34,7 +34,6 @@ class PostView(GenericAPIView):
 
 class CommentListView(GenericAPIView):
     serializer_class = CommentSerializer
-    # queryset = Comment.objects.all().order_by('-date')
     permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = paginations.CommentsPagination
 

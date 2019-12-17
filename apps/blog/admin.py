@@ -5,14 +5,11 @@ from martor.widgets import AdminMartorWidget
 from apps.translation.admin import TranslatedTextInlineLarge , TranslatedTextInlineSmall
 
 from apps.blog.models import Post, Comment, Tag
+from django_reverse_admin import ReverseModelAdmin
 
 
 @admin.register(Post)
-class PostAdmin(ModelAdmin):
-    fields = ()
-    formfield_overrides = {
-        models.TextField: {'widget': AdminMartorWidget},
-    }
+class PostAdmin(ReverseModelAdmin):
 
     inline_type = 'stacked'
     inline_reverse = [
