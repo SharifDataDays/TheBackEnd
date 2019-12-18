@@ -4,9 +4,10 @@ from apps.blog.models import *
 
 
 class TagSerializer(serializers.ModelSerializer):
+    name_value = serializers.CharField()
     class Meta:
         model = Tag
-        fields = ['name', 'color']
+        fields = ['name_value', 'color']
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -21,18 +22,27 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class PostSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
+    post_title_value = serializers.CharField()
+    post_description_value = serializers.CharField()
+    text_value = serializers.CharField()
+    count_comments = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ['tags', 'date', 'image',
-                  'post_title', 'text','post_description']
+        fields = ['count_comments','id','tags', 'date', 'image',
+                  'post_title_value', 'text_value','post_description_value']
+
+    def get_count_comments(self, obj):
+        return obj.comments.count()
 
 
 class PostDescriptionSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
+    post_title_value = serializers.CharField()
+    post_description_value = serializers.CharField()
 
     class Meta:
         model = Post
-        fields = ['tags', 'date', 'image', 'post_title',
-                  'post_description']
+        fields = ['id','tags', 'date', 'image', 'post_title_value',
+                  'post_description_value']
 

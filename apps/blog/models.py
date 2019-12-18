@@ -1,22 +1,21 @@
-import self as self
+
 from django.contrib.auth.models import User
 from django.db import models
-# import apps.tranlation.models.TranslatedText
-# import apps.tranlation.models.translatedTextField
+
 
 from apps.translation.models import translatedTextField
 
 
 class Post(models.Model):
+
     date = models.DateTimeField(auto_now_add=True)
     image = models.ImageField()
     post_title = translatedTextField(related_name='post_title')
     text = translatedTextField(related_name='text')
     post_description = translatedTextField(related_name='post_description')
-    comment_count = models.IntegerField(default=self.total_comments())
 
-    def total_comments(self):
-        return Comment.objects.filter(parent__pk=self.pk).count()
+
+
 
 
 class Comment(models.Model):
