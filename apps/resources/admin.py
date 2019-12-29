@@ -12,9 +12,9 @@ from .models import Document, Section, Subsection
 class SectionInline(admin.StackedInline):
     model = Section
     readonly_fields = ['uuid']
-    formfield_overrides = {
-        models.TextField: {'widget': AdminMartorWidget},
-    }
+#    formfield_overrides = {
+#        models.TextField: {'widget': AdminMartorWidget},
+#    }
 
 
 class SubtitleInline(admin.StackedInline):

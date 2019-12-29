@@ -1,12 +1,24 @@
+import secrets
+import base64
+
 from rest_framework import status, permissions
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
-from apps.accounts.serializer import *
-
-from django.template.loader import render_to_string
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
+from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
+from django.core import mail
 from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+
+from apps.accounts.serializer import *
+from apps.accounts.models import ResetPasswordToken, ActivateUserToken
 
 
 class SignUpView(GenericAPIView):
@@ -15,11 +27,59 @@ class SignUpView(GenericAPIView):
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
+        if User.objects.filter(email=serializer.initial_data['email']).count() > 0:
+            return Response({'error': 'A user with this email currently exists'}, status=400)
         if serializer.is_valid(raise_exception=True):
+
+            activate_user_token = ActivateUserToken(
+                    token=secrets.token_urlsafe(32),
+                    eid=urlsafe_base64_encode(force_bytes(serializer.validated_data['email'])),
+                    )
+            activate_user_token.save()
+
+            context = {
+                'domain': 'datadays.sharif.edu',
+                'eid': activate_user_token.eid,
+                'token': activate_user_token.token,
+            }
+
+            email_html_message = render_to_string('accounts/email/user_activate_email.html', context)
+            email_plaintext_message = render_to_string('accounts/email/user_activate_email.txt', context)
+
+            msg = EmailMultiAlternatives(
+                    # title:
+                    _("Activate Account for {title}".format(title="DataDays")),
+                    # message:
+                    email_plaintext_message,
+                    # from:
+                    "datadays.sharif@gmail.com",
+                    # to:
+                    [serializer.validated_data['email']]
+                )
+            msg.attach_alternative(email_html_message, "text/html")
+            msg.send()
+
             serializer.save()
-            return Response({'detail': 'User created successfully'})
+            serializer.instance.is_active = False
+            serializer.instance.save()
+
+            return Response({'detail': 'User created successfully. Check your email for confirmation link'}, status=200)
         else:
-            return Response({'detail': 'Error occurred during User creation'})
+            return Response({'error': 'Error occurred during User creation'}, status=500)
+
+
+class ActivateView(GenericAPIView):
+
+    def get(self, request, eid, token):
+        activate_user_token = get_object_or_404(ActivateUserToken,
+                eid=eid, token=token)
+
+        email = urlsafe_base64_decode(activate_user_token.eid).decode('utf-8')
+        user = get_object_or_404(User, email=email)
+        user.is_active = True
+        user.save()
+
+        return redirect('http://datadays.sharif.edu/login')
 
 
 class LogoutView(GenericAPIView):
@@ -32,20 +92,63 @@ class LogoutView(GenericAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class ForgotPasswordView(GenericAPIView):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
+class ResetPasswordView(GenericAPIView):
+    serializer_class = ResetPasswordSerializer
 
     def post(self, request):
-        pass
+        data = self.get_serializer(request.data).data
+
+        user = get_object_or_404(User, email=data['email'])
+
+        uid = urlsafe_base64_encode(force_bytes(user.id))
+        ResetPasswordToken.objects.filter(uid=uid).delete()
+        reset_password_token = ResetPasswordToken(
+                uid=uid,
+                token=secrets.token_urlsafe(32),
+                expiration_date=timezone.now() + timezone.timedelta(hours=24),
+            )
+        reset_password_token.save()
+
+        context = {
+            'domain': 'datadays.sharif.edu',
+            'username': user.username,
+            'uid': reset_password_token.uid,
+            'token': reset_password_token.token,
+        }
+
+        email_html_message = render_to_string('accounts/email/user_reset_password.html', context)
+        email_plaintext_message = render_to_string('accounts/email/user_reset_password.txt', context)
+
+        msg = EmailMultiAlternatives(
+                # title:
+                _("Password Reset for {title}".format(title="DataDays")),
+                # message:
+                email_plaintext_message,
+                # from:
+                "datadays.sharif@gmail.com",
+                # to:
+                [user.email]
+            )
+        msg.attach_alternative(email_html_message, "text/html")
+        msg.send()
+
+        return Response({'detail': 'Successfully Sent Reset Password Email'}, status=200)
 
 
-class LoginWithGoogleView(GenericAPIView):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
+class ResetPasswordConfirmView(GenericAPIView):
+    serializer_class = ResetPasswordConfirmSerializer
 
     def post(self, request):
-        pass
+        data = self.get_serializer(request.data).data
+
+        rs_token = get_object_or_404(ResetPasswordToken, uid=data['uid'], token=data['token'])
+        if (timezone.now() - rs_token.expiration_date).total_seconds() > 24 * 60 * 60:
+            return Response({'error': 'Token Expired'}, status=400)
+
+        user = get_object_or_404(User, id=urlsafe_base64_decode(data['uid']))
+        user.password = make_password(data['new_password1'])
+        user.save()
+        return Response({'detail': 'Successfully Changed Password'}, status=200)
 
 
 class ProfileView(GenericAPIView):
@@ -67,3 +170,4 @@ class ProfileView(GenericAPIView):
         user_serializer = UserViewSerializer(user)
         user_serializer.update(user, request.data)
         return Response(user_serializer.data)
+

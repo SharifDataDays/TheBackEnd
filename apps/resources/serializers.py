@@ -1,6 +1,8 @@
 from rest_framework.serializers import ModelSerializer, Serializer
 from rest_framework import serializers
 
+from django.conf import settings
+
 from .models import Document, Section, Subsection
 
 
@@ -27,7 +29,7 @@ class SectionSerializer(ModelSerializer):
 
     class Meta:
         model = Section
-        fields = ['uuid', 'title_en', 'title_fa', 'markdown', 'subtitles']
+        fields = ['uuid', 'title_en', 'title_fa', 'markdown', 'subtitles', 'link_to_colab']
 
     def validate(self, attrs):
         if 'title_en' not in attrs:
@@ -45,11 +47,19 @@ class SectionSerializer(ModelSerializer):
 
 
 class DocumentSerializer(ModelSerializer):
-    sections = SectionSerializer(many=True, read_only=True)
+
+    thumbnail = serializers.SerializerMethodField()
+    file = serializers.SerializerMethodField()
 
     class Meta:
         model = Document
-        fields = ['title_en', 'title_fa', 'sections']
+        fields = ['id', 'title_en', 'title_fa', 'description_en', 'description_fa', 'thumbnail', 'file', 'time_to_read']
+
+    def get_thumbnail(self, obj):
+        return settings.MEDIA_URL + obj.thumbnail.name
+
+    def get_file(self, obj):
+        return settings.MEDIA_URL + obj.file.name
 
     def validate(self, attrs):
         if 'title_en' not in attrs:

@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
-from apps.accounts.models import Profile
+from apps.accounts.models import Profile, ResetPasswordToken
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -53,3 +53,23 @@ class UserViewSerializer(serializers.ModelSerializer):
         profile.university = validated_data.get('university', profile.university)
         profile.save()
         return instance
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+
+    email = serializers.EmailField()
+
+
+class ResetPasswordConfirmSerializer(serializers.ModelSerializer):
+
+    new_password1 = serializers.CharField(max_length=100)
+    new_password2 = serializers.CharField(max_length=100)
+
+    class Meta:
+        model = ResetPasswordToken
+        fields = ['new_password1', 'new_password2', 'uid', 'token']
+
+    def validate(self, data):
+        if data['new_password1'] != data['new_password2']:
+            raise serializers.ValidationError('passwords don\'t match!')
+        return data
