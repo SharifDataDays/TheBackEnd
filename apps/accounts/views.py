@@ -27,8 +27,6 @@ class SignUpView(GenericAPIView):
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
-        if User.objects.filter(email=serializer.initial_data['email']).count() > 0:
-            return Response({'error': 'A user with this email currently exists'}, status=400)
         if serializer.is_valid(raise_exception=True):
 
             activate_user_token = ActivateUserToken(
@@ -42,26 +40,23 @@ class SignUpView(GenericAPIView):
                 'eid': activate_user_token.eid,
                 'token': activate_user_token.token,
             }
-
             email_html_message = render_to_string('accounts/email/user_activate_email.html', context)
             email_plaintext_message = render_to_string('accounts/email/user_activate_email.txt', context)
-
             msg = EmailMultiAlternatives(
-                    # title:
                     _("Activate Account for {title}".format(title="DataDays")),
-                    # message:
                     email_plaintext_message,
-                    # from:
                     "datadays.sharif@gmail.com",
-                    # to:
                     [serializer.validated_data['email']]
                 )
             msg.attach_alternative(email_html_message, "text/html")
-            msg.send()
+            try:
+                msg.send()
 
-            serializer.save()
-            serializer.instance.is_active = False
-            serializer.instance.save()
+                serializer.save()
+                serializer.instance.is_active = False
+                serializer.instance.save()
+            except:
+                return Response({'detail': 'Invalid email or user has not been saved.'}, status=406)
 
             return Response({'detail': 'User created successfully. Check your email for confirmation link'}, status=200)
         else:
@@ -115,18 +110,12 @@ class ResetPasswordView(GenericAPIView):
             'uid': reset_password_token.uid,
             'token': reset_password_token.token,
         }
-
         email_html_message = render_to_string('accounts/email/user_reset_password.html', context)
         email_plaintext_message = render_to_string('accounts/email/user_reset_password.txt', context)
-
         msg = EmailMultiAlternatives(
-                # title:
                 _("Password Reset for {title}".format(title="DataDays")),
-                # message:
                 email_plaintext_message,
-                # from:
                 "datadays.sharif@gmail.com",
-                # to:
                 [user.email]
             )
         msg.attach_alternative(email_html_message, "text/html")
@@ -145,7 +134,7 @@ class ResetPasswordConfirmView(GenericAPIView):
         if (timezone.now() - rs_token.expiration_date).total_seconds() > 24 * 60 * 60:
             return Response({'error': 'Token Expired'}, status=400)
 
-        user = get_object_or_404(User, id=urlsafe_base64_decode(data['uid']))
+        user = get_object_or_404(User, id=urlsafe_base64_decode(data['uid']).decode('utf-8'))
         user.password = make_password(data['new_password1'])
         user.save()
         return Response({'detail': 'Successfully Changed Password'}, status=200)
@@ -158,15 +147,11 @@ class ProfileView(GenericAPIView):
 
     def get(self, request):
         user = request.user
-        if not user.is_authenticated:
-            return Response({'detail': 'user is not authenticated'})
-        data = self.get_serializer(user).data['profile']
+        data = self.get_serializer(user).data
         return Response(data=data, status=HTTP_200_OK)
 
     def put(self, request):
         user = request.user
-        if not user.is_authenticated:
-            return Response({'detail': 'user is not authenticated'})
         user_serializer = UserViewSerializer(user)
         user_serializer.update(user, request.data)
         return Response(user_serializer.data)

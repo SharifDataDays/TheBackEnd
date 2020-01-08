@@ -17,7 +17,7 @@ MARTOR_MARKDOWN_SAFE_MODE = True  # default
 
 # Markdownify
 MARTOR_MARKDOWNIFY_FUNCTION = 'martor.utils.markdownify'  # default
-MARTOR_MARKDOWNIFY_URL = '/martor/markdownify/'  # default
+MARTOR_MARKDOWNIFY_URL = '/api/martor/markdownify/'  # default
 
 # Markdown extensions (default)
 MARTOR_MARKDOWN_EXTENSIONS = [
@@ -50,4 +50,4 @@ MARTOR_MARKDOWN_BASE_EMOJI_URL = \
 # please change this to your domain
 MARTOR_MARKDOWN_BASE_MENTION_URL = 'https://python.web.id/author/'
 
-CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_HTTPONLY = True
