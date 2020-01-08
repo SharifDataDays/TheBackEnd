@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models
 
-
 # Create your models here.
 from rest_framework.validators import UniqueValidator
 
@@ -14,14 +13,23 @@ class Notification(models.Model):
     text = models.TextField(max_length=200, null=False)
     seen = models.BooleanField(default=False, null=False)
 
+    def __str__(self):
+        return self.text
+
 
 class Subscriber(models.Model):
     email = models.EmailField(null=False, unique=True)
+
+    def __str__(self):
+        return self.email
 
 
 class EmailText(models.Model):
     text = models.TextField(null=False)
     html = models.TextField(editable=False)
+
+    def __str__(self):
+        return self.text
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
