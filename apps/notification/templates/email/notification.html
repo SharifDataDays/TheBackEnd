@@ -1,0 +1,16 @@
+{% load static i18n %}
+
+{% get_current_language_bidi as LANGUAGE_BIDI %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ subject }}</title>
+</head>
+<body>
+{% autoescape off %}
+    {{ context }}
+{% endautoescape %}
+</body>
+</html> 

@@ -1,0 +1,9 @@
+{% load static i18n %}
+
+{% get_current_language_bidi as LANGUAGE_BIDI %}
+
+
+
+{% autoescape off %}
+    {{ context }}
+{% endautoescape %}
