@@ -45,7 +45,7 @@ class EmailText(models.Model):
         }
         email_html_message = render_to_string('email/notification.html', context)
         email_plaintext_message = render_to_string('email/notification.txt', context)
-        for index in range(start=0, stop=subscribers.count() + 1, step=20):
+        for index in range(0, subscribers.count() + 1, 20):
             message = EmailMultiAlternatives(subject=self.subject, from_email="datadays.sharif@gmail.com",
                                              cc=subscribers, body=email_plaintext_message)
             message.attach_alternative(email_html_message, "text/html")
