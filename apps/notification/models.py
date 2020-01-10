@@ -1,12 +1,13 @@
 import markdown
 from django.contrib.auth.models import User
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
-from apps.notification.celery import *
 from django.db import models
+from apps.notification.celery import *
+
 
 # Create your models here.
-from rest_framework.validators import UniqueValidator
 
 
 class Notification(models.Model):
@@ -37,16 +38,8 @@ class EmailText(models.Model):
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         self.html = markdown.markdown(self.text)
-        subscribers = Subscriber.objects.all()
+        subscribers = Subscriber.objects.all().values()
 
-        context = {
-            'subject': self.subject,
-            'context': self.text
-        }
-        email_html_message = render_to_string('email/notification.html', context)
-        email_plaintext_message = render_to_string('email/notification.txt', context)
-        for index in range(0, subscribers.count() + 1, 20):
-            message = EmailMultiAlternatives(subject=self.subject, from_email="datadays.sharif@gmail.com",
-                                             cc=subscribers, body=email_plaintext_message)
-            message.attach_alternative(email_html_message, "text/html")
-            send_email.apply_async(message)
+        for i in range(0, subscribers.count() + 1, 20):
+            send_email.apply_async(
+                kwargs={'subject': self.subject, 'text': self.text, 'to': list(subscribers[i:i + 20])})
