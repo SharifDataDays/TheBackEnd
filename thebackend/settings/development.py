@@ -30,26 +30,28 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.staticfiles',
 
-    'rest_framework',
-    'rest_auth',
-    'rest_framework.authtoken',
-    'martor',
-    'django_rest_passwordreset',
-    'django_extensions',
-    'djcelery',
     'corsheaders',
+    'django_extensions',
+    'django_rest_passwordreset',
+    'djcelery',
     'djcelery_email',
+    'martor',
+    'request',
+    'rest_auth',
+    'rest_framework',
+    'rest_framework.authtoken',
 
     'apps.accounts',
     'apps.blog',
-    'apps.resources.apps.ResourcesConfig',
+    'apps.go',
     'apps.homepage',
     'apps.notification',
-    'apps.go',
+    'apps.resources.apps.ResourcesConfig',
     'apps.uploads',
 ]
 
@@ -60,6 +62,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'request.middleware.RequestMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 #    'thebackend.middlewares.TranslationMiddleware',
@@ -86,6 +89,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'thebackend.wsgi.application'
+
+SITE_ID = 1
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
