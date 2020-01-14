@@ -2,7 +2,6 @@ import os
 
 from .development import *
 
-
 SECRET_KEY = 'oaeu#@$puoeuj,#$>Ueok,4IY@#$"PU.ohukAEOUO>AYU34$IPK'
 
 DEBUG = False
@@ -85,7 +84,6 @@ LOGGING = {
     }
 }
 
-
 TIME_ZONE = 'Iran'
 
 STATIC_URL = '/static/'
@@ -96,10 +94,9 @@ MEDIA_ROOT = '/media'
 
 CSRF_COOKIE_HTTPONLY = True
 
-EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
-EMAIL_HOST = os.getenv('EMAIL_HOST')
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-EMAIL_PORT = os.getenv('EMAIL_PORT')
-
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = 'true'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'datadays.sharif@gmail.com'
+EMAIL_HOST_PASSWORD = 'koskeshramzomikhaichikar'
+EMAIL_PORT = 587
