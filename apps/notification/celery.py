@@ -14,6 +14,6 @@ def send_email(subject: string, text: string, to: list):
     email_html_message = render_to_string('email/notification.html', context)
     email_plaintext_message = render_to_string('email/notification.txt', context)
     msg = EmailMultiAlternatives(subject=subject, from_email="datadays.sharif@gmail.com",
-                                 cc=to, body=email_plaintext_message)
+                                 bcc=to, body=email_plaintext_message)
     msg.attach_alternative(email_html_message, "text/html")
     msg.send()
