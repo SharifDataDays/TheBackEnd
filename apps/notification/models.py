@@ -31,6 +31,7 @@ class EmailText(models.Model):
     subject = models.CharField(null=False, max_length=100)
     text = models.TextField(null=False)
     html = models.TextField(editable=False)
+    receivers = models.ManyToManyField(Subscriber)
 
     def __str__(self):
         return self.text
