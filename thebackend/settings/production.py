@@ -95,8 +95,8 @@ MEDIA_ROOT = '/media'
 CSRF_COOKIE_HTTPONLY = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_TLS = 'true'
+EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'datadays.sharif@gmail.com'
-EMAIL_HOST_PASSWORD = 'koskeshramzomikhaichikar'
+EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 587
