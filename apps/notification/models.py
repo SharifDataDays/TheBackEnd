@@ -39,10 +39,11 @@ class EmailText(models.Model):
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         self.html = markdown.markdown(self.text)
-        subscribers = list()
-        for subscriber in Subscriber.objects.values_list('email'):
-            subscribers.append(subscriber[0])
-        for i in range(0, len(subscribers) + 1, 20):
-            send_email.apply_async([self.subject, self.text, subscribers[i:i + 20]])
+        if not self.pk:
+            subscribers = list()
+            for subscriber in Subscriber.objects.values_list('email'):
+                subscribers.append(subscriber[0])
+            for i in range(0, len(subscribers) + 1, 20):
+                send_email.apply_async([self.subject, self.text, subscribers[i:i + 20]])
 
         super().save(force_insert, force_update, using, update_fields)
