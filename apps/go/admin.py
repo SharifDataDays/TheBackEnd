@@ -6,5 +6,5 @@ from apps.go.models import Redirect
 
 @admin.register(Redirect)
 class RedirectAdmin(ModelAdmin):
-    read_only_fields = ['hits']
+    readonly_fields = ['hits']
     pass
