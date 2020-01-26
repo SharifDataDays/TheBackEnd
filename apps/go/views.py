@@ -12,9 +12,10 @@ class RedirectView(GenericAPIView):
     def get(self, request, source):
 
         redirect = Redirect.objects.filter(source=source)
-        if redirect.count() == 0:
+        if redirect.count() != 1:
             raise NotFound(detail="Error 404, page not found", code=404)
 
+        redirect = redirect.get()
         redirect.hits = redirect.hits + 1
         redirect.save()
 
