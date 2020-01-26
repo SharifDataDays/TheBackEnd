@@ -10,9 +10,12 @@ from rest_framework.generics import GenericAPIView
 class RedirectView(GenericAPIView):
 
     def get(self, request, source):
-        if Redirect.objects.filter(source=source).count() == 0:
+
+        redirect = Redirect.objects.filter(source=source)
+        if redirect.count() == 0:
             raise NotFound(detail="Error 404, page not found", code=404)
 
-        destination = Redirect.objects.filter(source=source).get()
+        redirect.hits = redirect.hits + 1
+        redirect.save()
 
-        return redirect(destination.destination)
+        return redirect(redirect.destination)
