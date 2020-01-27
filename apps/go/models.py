@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 
 class Redirect(models.Model):
     source = models.CharField(max_length=50, unique=True)
-    destination = models.CharField(max_length=50, unique=True)
+    destination = models.CharField(max_length=50)
     hits = models.IntegerField(default=0)
 
     def __str__(self):
