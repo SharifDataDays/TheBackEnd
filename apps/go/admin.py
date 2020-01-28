@@ -1,5 +1,7 @@
+from django.http import HttpResponse
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
+
 from apps.go.models import Redirect
 
 
