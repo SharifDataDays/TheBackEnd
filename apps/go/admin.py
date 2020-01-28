@@ -23,7 +23,7 @@ class ExportCsvMixin:
 
 
 @admin.register(Redirect)
-class RedirectAdmin(ModelAdmin, ExportCsvMixin:
+class RedirectAdmin(ModelAdmin, ExportCsvMixin):
     list_display = ['source', 'destination', 'hits']
     sortable_by = ['source', 'destination', 'hits']
     readonly_fields = ['hits']
