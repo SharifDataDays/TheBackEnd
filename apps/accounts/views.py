@@ -93,7 +93,7 @@ class ResetPasswordView(GenericAPIView):
     def post(self, request):
         data = self.get_serializer(request.data).data
 
-        user = get_object_or_404(User, email=data['email'])
+        user = get_object_or_404(User, email=data['email'].lower())
 
         uid = urlsafe_base64_encode(force_bytes(user.id))
         ResetPasswordToken.objects.filter(uid=uid).delete()
