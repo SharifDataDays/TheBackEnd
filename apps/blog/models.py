@@ -11,7 +11,7 @@ class Post(models.Model):
     text_fa = models.TextField(max_length=10000)
     description_en = models.TextField(max_length=300)
     description_fa = models.TextField(max_length=300)
-
+    shown = models.BooleanField(default=True)
     def __str__(self):
         return '%s %s' % (self.title_en, self.title_fa)
 

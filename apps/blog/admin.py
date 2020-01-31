@@ -8,6 +8,8 @@ from apps.blog.models import Post, Comment, Tag
 
 @admin.register(Post)
 class PostAdmin(ModelAdmin):
+    list_display = ['title_fa', 'shown']
+    list_editable = ['shown']
     formfield_overrides = {
         models.TextField: {'widget': AdminMartorWidget},
     }
