@@ -1,4 +1,5 @@
 import string
+import time
 
 from celery import shared_task
 from django.core.mail import EmailMultiAlternatives
@@ -17,3 +18,4 @@ def send_email(subject: string, text: string, to: list):
                                  bcc=to, body=email_plaintext_message)
     msg.attach_alternative(email_html_message, "text/html")
     msg.send()
+    time.sleep(60)
